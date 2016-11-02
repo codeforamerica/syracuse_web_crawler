@@ -32,6 +32,7 @@ def retrieve_page_links(url):
     broken_links = []
     all_links = []
 
+# deal with inconsistent links 
     if not '/' in url:
         url = '/' + url 
 
@@ -69,6 +70,10 @@ class Page():
         self.count = 1
         self.categories=set(categories,)
 
+
+    def __unicode__(self):
+        return self.url
+
     def up_count(self):
         self.count += 1
 
@@ -77,8 +82,15 @@ class Page():
 
     def collect_links(self):
         [links, self.broken_targets] = retrieve_page_links(self.url)
+        print('PAGE FXN')
+        print(links, self.broken_targets)
+
         ALL_BROKEN_LINKS.update(set(self.broken_targets))
         for link in links:
+            # handle anchor links 
+            if '#' in link: 
+                anchor = link.index('#')
+                link = g[:anchor]
             if link not in ALL_PAGES:
                 page = Page(link, self.depth+1, self.categories)
                 self.targets.append(page)
