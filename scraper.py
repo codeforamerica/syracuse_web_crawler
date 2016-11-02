@@ -3,92 +3,109 @@ import requests
 import itertools
 import pprint
 
-SYRACUSE_SITE_CATEGORIES = {1:'Services', 
-                            2:'Assessment', 
-                            3:'Budget_Home_Page',
-                            4:'Code_Enforcement', 
-                           5: 'Community_Development',
-                           6:'Dept_of_Public_Works', 
-                           7:'ED_Home', 
-                           8:'Engineering',
-                           9: 'Finance_Dept',
-                           10: 'Fire_Department',
-                           11: 'Fleet_Management',
-                           12:'Information_Systems',
-                           13 : 'Lakefront', 
-                           14: 'Law_Department', 
-                           16: 'Personnel',
-                           17: 'Police_Department', 
-                           18: 'Purchase', 
-                           19: 'Research_Department', 
-                           20: 'Water_Department', 
-                           21: 'Zoning', 
-                           22: 'Other_Departments'}
+ROOT_URL = 'http://www.syrgov.net'
+SITE_MAP_URL = ROOT_URL + '/Sitemap.aspx'
+SYRACUSE_SITE_CATEGORIES = ['Services', 
+                            'Assessment', 
+                            'Budget_Home_Page',
+                           'Code_Enforcement', 
+                           'Community_Development',
+                           'Dept_of_Public_Works', 
+                           'ED_Home', 
+                           'Engineering',
+                           'Finance_Dept',
+                           'Fire_Department',
+                           'Fleet_Management',
+                           'Information_Systems',
+                           'Lakefront', 
+                           'Law_Department', 
+                           'Personnel',
+                            'Police_Department', 
+                           'Purchase', 
+                           'Research_Department', 
+                           'Water_Department', 
+                          'Zoning', 
+                           'Other_Departments']
 
-def retrieve_page_links(self, url): 
+
+def retrieve_page_links(url): 
     broken_links = []
     all_links = []
 
-    try: 
-        syr_site_map = requests.get(url)
-        html = syr_site_map.text
-        soup = BeautifulSoup(html, 'html.parser')
-        body = soup.body
+    if not '/' in url:
+        url = '/' + url 
+
+    syr_site_map = requests.get(ROOT_URL + url)
+    html = syr_site_map.text
+    soup = BeautifulSoup(html, 'html.parser')
+    body = soup.body
+    if body: 
         for link in body.find_all('a'):
             href = link.get('href')
-            if href not in all_links: 
-                all_links.append(href)
+            if 'http' not in href:
+                try:
+                    requests.get(ROOT_URL + href)
+                except Exception:
+                    broken_links.append(href)
+                else:
+                    all_links.append(href)
+            return all_links, broken_links 
+    return [], []
+
+
+ALL_PAGES = {} # url->Page object
+ALL_BROKEN_LINKS = set()
+    
+class Page():
+#     examples of targets dict {round:2, url: 'Home.apsx', count:1}
+    def __init__(self, url, depth=None, categories=None):
+        self.url = url
+        self.targets = [] 
+        self.broken_targets = []
+        if depth:
+            self.depth=depth
+        else:
+            self.depth = 0
+        self.count = 1
+        self.categories=set(categories,)
+
+    def up_count(self):
+        self.count += 1
+
+    def add_categories(self, categories):
+        self.categories.update(categories)
+
+    def collect_links(self):
+        [links, self.broken_targets] = retrieve_page_links(self.url)
+        ALL_BROKEN_LINKS.update(set(self.broken_targets))
+        for link in links:
+            if link not in ALL_PAGES:
+                page = Page(link, self.depth+1, self.categories)
+                self.targets.append(page)
+                ALL_PAGES[link] = page
+            else:
+                ALL_PAGES[link].up_count()
+                if self.categories:
+                    ALL_PAGES[link].add_categories(self.categories)
+        for target in self.targets:
+            target.collect_links()           
+
+
+    
+def retrieve_syracuse_site_map_body(): 
+    try: 
+        syr_site_map = requests.get(SITE_MAP_URL)
     except: 
-        broken_links.append(url)
-
-    return all_links, broken_links 
-
-class Round():
-    def __init__(self, count, all_links):
-        self.count = count 
-        self.all_links = []
-
-class Node():
-     def __init__(self, href, group, category):
-        self.href = href
-        self.group = group 
-        self.category = category 
+        raise Exception(url + " errored during request.")
+    html = syr_site_map.text
+    soup = BeautifulSoup(html, 'html.parser')
+    body = soup.body
+    return body 
     
-class Link():
-    def __init__(self, source,target,category, target_broken=None):
-        self.category = category
-        self.source = source
-        self.target = target 
-        self.value = 1
-        target_broken = False 
-        
-class SyracuseSiteMapScraper(): 
-    def __init__(self):
-        self.site_categories = SYRACUSE_SITE_CATEGORIES 
-        self.d3_nodes = []
-        self.internal_links = []
-        self.url = 'http://www.syrgov.net/Sitemap.aspx'
-        self.rounds = []
-        
-    def retrieve_group_num(self, key):
-        for k,v in self.site_categories.items(): 
-            if v == key: 
-                return k 
-    
-    def retrieve_syracuse_site_map_body(self): 
-        try: 
-            syr_site_map = requests.get(self.url)
-        except: 
-            raise Exception(self.url + " errored during request.")
-        html = syr_site_map.text
-        soup = BeautifulSoup(html, 'html.parser')
-        body = soup.body
-        return body 
-        
-    def create_page_nodes(self, key): 
-        body = self.retrieve_syracuse_site_map_body()
-        page_links = []
-        nodes = []
+def initialize_origin_pages(): 
+    internal_links = []
+    body = retrieve_syracuse_site_map_body()
+    for key in SYRACUSE_SITE_CATEGORIES: 
         href= '/' + key + '.aspx'
         f = body.find(href=href)
         try: 
@@ -100,62 +117,23 @@ class SyracuseSiteMapScraper():
             for l in links:
                 href = l.get('href')
                 if 'http' not in href:
-                    self.internal_links.append(href)
-                    group = self.retrieve_group_num(key)
-                    page_links.append({"href":href, 
-                                           "group":group, 
-                                           "category":key, 
-                                            "round":1})
-        return page_links 
+                    page_data = {'url':href, 'category':key}
+                    internal_links.append(page_data)
+                    
+    top_pages = []
+    for l in internal_links:
+        url = l['url']
+        categories = [l['category']]
+        page = Page(url=url,categories=categories)
+        if url not in ALL_PAGES:
+            ALL_PAGES[url] = page 
+            page.collect_links()
+            top_pages.append(page)
+        else:
+            ALL_PAGES[url].add_categories(categories)
+    return top_pages
 
-    def initialize_and_return_origin_nodes(self): 
-        d3_nodes = []
-        links = []
-        for key in self.site_categories.values():
-            nodes = self.create_page_nodes(key)
-            d3_nodes += nodes 
+if __name__ == "__main__":
+    top_pages = initialize_origin_pages()
+    import pdb; pdb.set_trace()
 
-        deduped_d3_nodes = [dict(t) for t in set([tuple(d.items()) for d in d3_nodes])]
-        nodes = [Node(href=n['href'], group=n['group'], category=n['category']) for n in deduped_d3_nodes]
-        self.d3_nodes = nodes 
-            
-        return nodes 
-    
-    def intialize_and_return_round_one_links(self):
-        links = []
-        for n in self.d3_nodes:
-            r = requests.get(self.url + n.href)
-            source='/'
-            target=n.href
-            category=n.category
-            if r.ok == True: 
-                target_broken=False
-            else: 
-                target_broken=True 
-            l = Link(source='/', 
-                     target=n.href, 
-                     category=category,
-                     target_broken=target_broken)
-            links.append(l)
-        round_one = Round(count=0, all_links=links)
-        self.rounds.append(round_one)
-        return links 
-        
-    
-    def create_rounds(self, single_round): 
-        
-        round_num = len(self.rounds)
-        last_round = self.rounds[len(self.rounds) - 1]
-        origin_links = [link.target for link in last_round.all_links]
-        
-        single_round = Round(count=round_num, origin_links=origin_links)
-        for url in single_round.origin_links:
-            all_links, broken_links = retrieve_page_links(url)
-            for link in all_links: 
-                link = Link(source=url, target=link) 
-                single_round.all_links.append(link)
-                single_round.target_urls.append(link)
-            for link in broken_links: 
-                link = Link(source=url, target=link, target_broken=True) 
-                single_round.all_links.append(link)
-        self.rounds.append(single_round)
