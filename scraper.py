@@ -44,8 +44,8 @@ def make_request(url, count=None):
     try:
         res = requests.get(ROOT_URL + url, timeout=0.005)
     except Exception as e:
-        print('timeout for %s at %s' & (url, count))
-        time.sleep(10)
+        print('timeout for %s at %s' % (url, count))
+        time.sleep(30)
         count += 1
         if count == 5:
             raise e
