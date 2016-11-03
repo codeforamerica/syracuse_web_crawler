@@ -15,4 +15,5 @@ print('top 100 linked pages')
 pages = list(all_pages.values())
 pages.sort(key=lambda x: x.count, reverse=True)
 for page in pages[0:100]:
-    print('%s: %i' % (page.url, page.count))
+    print('(%s)  %s: %i' % (','.join(page.categories),
+        page.url, page.count))
