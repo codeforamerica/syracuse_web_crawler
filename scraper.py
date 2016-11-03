@@ -3,7 +3,7 @@ import requests
 import requests_cache
 import itertools
 import pprint
-
+import time
 import pickle
 
 requests_cache.install_cache('syracuse_web_crawler_cache')
@@ -35,6 +35,23 @@ SYRACUSE_SITE_CATEGORIES = ['Services',
 ALL_PAGES = {} # url->Page object
 ALL_BROKEN_LINKS = set()
 
+def make_request(url, count=None):
+    if not count:
+        count = 0
+
+    if not '/' in url:
+        url = '/' + url
+    try:
+        res = requests.get(ROOT_URL + url, timeout=0.005)
+    except Exception as e:
+        print('timeout for %s at %s' & (url, count))
+        time.sleep(10)
+        count += 1
+        if count == 5:
+            raise e
+        return make_request(url, count)
+    else:
+        return res
 
 def retrieve_page_links(url,):
     if url.startswith('mailto') or url.endswith('docx') or \
@@ -42,12 +59,7 @@ def retrieve_page_links(url,):
         return [], []
     broken_links = []
     all_links = []
-
-    # deal with inconsistent links
-    if not '/' in url:
-        url = '/' + url
-
-    res = requests.get(ROOT_URL + url)
+    res = make_request(url)
     content_type = res.headers['Content-Type']
     print(content_type)
     if 'text/html' not in content_type:
@@ -68,10 +80,10 @@ def retrieve_page_links(url,):
             links = []
         print(links)
         for href in links:
-            if not '/' in href:
+            if not href.startswith('/') and not href.startswith('mailto'):
                 href = '/' + href
             try:
-                res = requests.get(ROOT_URL + href)
+                res = requests.get(ROOT_URL + href, timeout=0.001)
             except Exception:
                 broken_links.append(href)
             else:
