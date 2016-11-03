@@ -101,6 +101,10 @@ class Page():
     def add_categories(self, categories):
         self.categories.update(categories)
 
+    def set_depth(self, depth):
+        if depth < self.depth:
+            self.depth=depth
+
     def collect_links(self):
         print('PAGE FXN:' + self.url)
         [links, self.broken_targets] = retrieve_page_links(self.url)
@@ -118,6 +122,7 @@ class Page():
                 ALL_PAGES[link] = page
             else:
                 ALL_PAGES[link].up_count()
+                ALL_PAGES[link].set_depth(self.depth)
                 if self.categories:
                     ALL_PAGES[link].add_categories(self.categories)
         for target in self.targets:
