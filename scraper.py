@@ -42,7 +42,7 @@ def make_request(url, count=None):
     if not '/' in url:
         url = '/' + url
     try:
-        res = requests.get(ROOT_URL + url, timeout=0.005)
+        res = requests.get(ROOT_URL + url, timeout=0.5)
     except Exception as e:
         print('timeout for %s at %s' % (url, count))
         time.sleep(30)
@@ -107,8 +107,7 @@ class Page():
         self.count = 1
         self.categories=set(categories,)
 
-
-    def __unicode__(self):
+    def __str__(self):
         return self.url
 
     def up_count(self):
@@ -182,9 +181,9 @@ def initialize_origin_pages():
         if url not in ALL_PAGES:
             ALL_PAGES[url] = page
             page.collect_links()
-            top_pages.append(page)
         else:
             ALL_PAGES[url].add_categories(categories)
+        top_pages.append(page)
     return top_pages
 
 if __name__ == "__main__":
