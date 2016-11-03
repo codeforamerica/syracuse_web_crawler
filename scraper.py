@@ -38,7 +38,7 @@ ALL_BROKEN_LINKS = set()
 
 def retrieve_page_links(url,):
     if url.startswith('mailto') or url.endswith('docx') or \
-            url.endswith('pdf') or url.endswith('doc'):
+            url.endswith('pdf') or url.endswith('PDF') or url.endswith('doc'):
         return [], []
     broken_links = []
     all_links = []
@@ -47,8 +47,12 @@ def retrieve_page_links(url,):
     if not '/' in url:
         url = '/' + url
 
-    syr_site_map = requests.get(ROOT_URL + url)
-    html = syr_site_map.text
+    res = requests.get(ROOT_URL + url)
+    content_type = res.headers['Content-Type']
+    print(content_type)
+    if 'text/html' not in content_type:
+        return [], []
+    html = res.text
     soup = BeautifulSoup(html, 'html.parser')
     body = soup.body
     if body:
