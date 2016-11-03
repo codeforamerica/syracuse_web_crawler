@@ -4,6 +4,7 @@ import requests_cache
 import itertools
 import pprint
 
+import pickle
 
 requests_cache.install_cache('syracuse_web_crawler_cache')
 
@@ -31,8 +32,14 @@ SYRACUSE_SITE_CATEGORIES = ['Services',
                           'Zoning',
                            'Other_Departments']
 
+ALL_PAGES = {} # url->Page object
+ALL_BROKEN_LINKS = set()
+
 
 def retrieve_page_links(url,):
+    if url.startswith('mailto') or url.endswith('docx') or \
+            url.endswith('pdf') or url.endswith('doc'):
+        return [], []
     broken_links = []
     all_links = []
 
@@ -47,8 +54,12 @@ def retrieve_page_links(url,):
     if body:
         links =  body.find_all('a')
         if links:
-            links = [
-            link.get('href') for link in links if 'http' not in link.get('href')]
+            urls = []
+            for link in links:
+                href = link.get('href')
+                if href and 'http' not in href:
+                    urls.append(href)
+            links = urls
         else:
             links = []
         print(links)
@@ -68,11 +79,7 @@ def retrieve_page_links(url,):
     return [], []
 
 
-ALL_PAGES = {} # url->Page object
-ALL_BROKEN_LINKS = set()
-
 class Page():
-#     examples of targets dict {round:2, url: 'Home.apsx', count:1}
     def __init__(self, url, depth=None, categories=None):
         self.url = url
         self.targets = []
@@ -161,5 +168,7 @@ def initialize_origin_pages():
 
 if __name__ == "__main__":
     top_pages = initialize_origin_pages()
-    import ipdb; ipdb.set_trace()
+    pickle.dump(top_pages, open('./top_pages.pickle', 'wb'))
+    pickle.dump(ALL_PAGES, open('./all_pages.pickle', 'wb'))
+    pickle.dump(ALL_BROKEN_LINKS, open('./all_broken_links.pickle', 'wb'))
 
