@@ -1,3 +1,4 @@
+from collections import Counter
 from bs4 import BeautifulSoup
 import requests
 import requests_cache
@@ -33,14 +34,12 @@ SYRACUSE_SITE_CATEGORIES = ['Services',
                            'Other_Departments']
 
 ALL_PAGES = {} # url->Page object
-ALL_BROKEN_LINKS = set()
+ALL_BROKEN_LINKS = Counter() # url->count
 
 def make_request(url, count=None):
     if not count:
         count = 0
 
-    if not '/' in url:
-        url = '/' + url
     try:
         res = requests.get(ROOT_URL + url, timeout=0.5)
     except Exception as e:
@@ -59,6 +58,10 @@ def retrieve_page_links(url,):
         return [], []
     broken_links = []
     all_links = []
+    if not '/' in url:
+        url = '/' + url
+    if url in ALL_BROKEN_LINKS:
+        return [], []
     res = make_request(url)
     content_type = res.headers['Content-Type']
     print(content_type)
@@ -80,6 +83,8 @@ def retrieve_page_links(url,):
             links = []
         print(links)
         for href in links:
+            if href.startswith('mailto'):
+                continue
             if not href.startswith('/') and not href.startswith('mailto'):
                 href = '/' + href
             try:
@@ -122,10 +127,11 @@ class Page():
 
     def collect_links(self):
         print('PAGE FXN:' + self.url)
-        [links, self.broken_targets] = retrieve_page_links(self.url)
+        [links, broken_links] = retrieve_page_links(self.url)
+        self.broken_targets = Counter(broken_links)
         print(links, self.broken_targets)
 
-        ALL_BROKEN_LINKS.update(set(self.broken_targets))
+        ALL_BROKEN_LINKS.update(self.broken_targets)
         for link in links:
             # handle anchor links
             if '#' in link:

@@ -1,3 +1,4 @@
+from collections import Counter
 from scraper import *
 import pickle
 
@@ -17,3 +18,15 @@ pages.sort(key=lambda x: x.count, reverse=True)
 for page in pages[0:100]:
     print('(%s)  %s: %i' % (','.join(page.categories),
         page.url, page.count))
+
+print('pages with broken links')
+pages.sort(key=lambda x: len(x.broken_targets), reverse=True)
+for page in pages:
+    broken_count = len(page.broken_targets)
+    if broken_count==0:
+        break
+    print('(%s)  %s: %i' % (','.join(page.categories),
+        page.url, broken_count))
+
+print('mosted linked to broken links')
+print(broken_links.most_common(20))
