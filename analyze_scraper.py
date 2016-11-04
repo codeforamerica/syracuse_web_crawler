@@ -9,7 +9,7 @@ top_pages = pickle.load(open('./top_pages.pickle', 'rb'))
 
 print('top pages: %i' % len(top_pages))
 print('all pages: %i' % len(all_pages))
-print('broken links: %i' % len(broken_links))
+print('broken links: %i' % len(list(broken_links.elements())))
 
 
 print('top 100 linked pages')
@@ -29,6 +29,6 @@ for page in pages:
         page.url, broken_count))
 
 print('mosted linked to broken links')
-ms = broken_links.most_common(20)
+ms = broken_links.most_common(100)
 for c in ms:
     print('%s: %s' % c)
