@@ -29,4 +29,6 @@ for page in pages:
         page.url, broken_count))
 
 print('mosted linked to broken links')
-print(broken_links.most_common(20))
+ms = broken_links.most_common(20)
+for c in ms:
+    print('%s: %s' % c)
