@@ -53,9 +53,10 @@ def make_request(url, count=None):
         return res
 
 def retrieve_page_links(url,):
+    mailto_links = []
     if url.startswith('mailto') or url.endswith('docx') or \
             url.endswith('pdf') or url.endswith('PDF') or url.endswith('doc'):
-        return [], []
+        return [], [] 
     broken_links = []
     all_links = []
     if not '/' in url:
@@ -84,11 +85,11 @@ def retrieve_page_links(url,):
         print(links)
         for href in links:
             if href.startswith('mailto'):
-                continue
-            if not href.startswith('/') and not href.startswith('mailto'):
+                mailto_links.append(href)
+            elif href.startswith('/'):
                 href = '/' + href
             try:
-                res = requests.get(ROOT_URL + href, timeout=0.001)
+                res = requests.get(ROOT_URL + href, timeout=0.5)
             except Exception:
                 broken_links.append(href)
             else:
@@ -96,8 +97,8 @@ def retrieve_page_links(url,):
                     broken_links.append(href)
                 else:
                     all_links.append(href)
-        return all_links, broken_links
-    return [], []
+        return all_links, broken_links 
+    return [], [] 
 
 
 class Page():
@@ -111,6 +112,7 @@ class Page():
             self.depth = 0
         self.count = 1
         self.categories=set(categories,)
+        self.mailto_links = []
 
     def __str__(self):
         return self.url
