@@ -7,7 +7,7 @@ from plotly.graph_objs import *
 from plotly.offline import offline
 
 
-path = './backup'
+path = '.'
 all_pages = pickle.load(open(path+'/all_pages.pickle', 'rb'))
 broken_links = pickle.load(open(path+'/all_broken_links.pickle', 'rb'))
 top_pages = pickle.load(open(path+'/top_pages.pickle', 'rb'))
