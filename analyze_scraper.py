@@ -157,4 +157,4 @@ def create_network_graph(pages):
     fig=Figure(data=data, layout=layout)
     offline.plot(fig, {'image': 'svg'})
 
-create_network_graph(page)
+create_network_graph(pages)
