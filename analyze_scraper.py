@@ -127,7 +127,7 @@ def create_network_graph(pages):
             title="Syracuse City Site Analysis",
             width=1000,
             height=1000,
-            showlegend=False,
+            showlegend=True,
             scene=Scene(
             xaxis=XAxis(axis),
             yaxis=YAxis(axis),
@@ -139,7 +139,7 @@ def create_network_graph(pages):
         hovermode='closest',
         annotations=Annotations([
             Annotation(
-            showarrow=False,
+            showarrow=True,
                 text="Data source: <a href='http://syrnet.net'>[1]</a>",
                 xref='paper',
                 yref='paper',
