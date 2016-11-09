@@ -41,7 +41,7 @@ def make_request(url, count=None):
         count = 0
 
     try:
-        res = requests.get(ROOT_URL + url, timeout=1)
+        res = requests.get(ROOT_URL + url, timeout=2)
     except Exception as e:
         print('timeout for %s at %s' % (url, count))
         time.sleep(30)
@@ -61,8 +61,6 @@ def retrieve_page_links(url,):
     all_links = []
     if not '/' in url:
         url = '/' + url
-    if url in ALL_BROKEN_LINKS:
-        return [], [], []
     res = make_request(url)
     content_type = res.headers['Content-Type']
     print(content_type)
@@ -84,19 +82,23 @@ def retrieve_page_links(url,):
             links = []
         print(links)
         for href in links:
+            if '#' in href:
+                anchor = href.index('#')
+                href = href[:anchor]
             if href.startswith('mailto'):
                 mailto_links.append(href)
-            elif href.startswith('/'):
-                href = '/' + href
-            try:
-                res = requests.get(ROOT_URL + href, timeout=1)
-            except Exception:
-                broken_links.append(href)
             else:
-                if res.status_code == 404:
+                if href.startswith('/'):
+                    href = '/' + href
+                try:
+                    res = requests.get(ROOT_URL + href, timeout=2)
+                except Exception:
                     broken_links.append(href)
                 else:
-                    all_links.append(href)
+                    if res.status_code == 404:
+                        broken_links.append(href)
+                    else:
+                        all_links.append(href)
         return all_links, broken_links, mailto_links
     return [], [], []
 
@@ -137,9 +139,6 @@ class Page():
         ALL_BROKEN_LINKS.update(self.broken_targets)
         for link in links:
             # handle anchor links
-            if '#' in link:
-                anchor = link.index('#')
-                link = link[:anchor]
             if link not in ALL_PAGES:
                 page = Page(link, self.depth+1, self.categories)
                 self.targets.append(page)

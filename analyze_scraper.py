@@ -2,10 +2,10 @@ from collections import Counter
 from scraper import *
 import pickle
 
-
-all_pages = pickle.load(open('./all_pages.pickle', 'rb'))
-broken_links = pickle.load(open('./all_broken_links.pickle', 'rb'))
-top_pages = pickle.load(open('./top_pages.pickle', 'rb'))
+path = './backup'
+all_pages = pickle.load(open(path+'/all_pages.pickle', 'rb'))
+broken_links = pickle.load(open(path+'/all_broken_links.pickle', 'rb'))
+top_pages = pickle.load(open(path+'/top_pages.pickle', 'rb'))
 
 print('top pages: %i' % len(top_pages))
 print('all pages: %i' % len(all_pages))
@@ -32,3 +32,5 @@ print('mosted linked to broken links')
 ms = broken_links.most_common(100)
 for c in ms:
     print('%s: %s' % c)
+
+import pdb; pdb.set_trace()
