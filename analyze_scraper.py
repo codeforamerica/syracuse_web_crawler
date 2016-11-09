@@ -1,10 +1,10 @@
 from collections import Counter
 from scraper import *
 import pickle
-import igraph as ig 
+import igraph as ig
 import plotly.plotly as py
 from plotly.graph_objs import *
-from plotly.offline import offline 
+from plotly.offline import offline
 
 
 path = './backup'
@@ -39,124 +39,122 @@ for c in ms:
     print('%s: %s' % c)
 
 def retrieve_node_group(categories):
-    if categories: 
+    if categories:
         category = categories.pop()
         group = SYRACUSE_SITE_CATEGORIES.index(category)
-    else: 
+    else:
         group = 22
-    return group 
+    return group
 
-def create_d3_link_relationships(pages): 
+def create_d3_link_relationships(pages):
     nodes = []
     urls_to_nodes = {}
     d3_link_relationships = []
-    for i, p in enumerate(pages): 
+    for i, p in enumerate(pages):
         group = retrieve_node_group(p.categories)
         node = {"name":p.url, "group":group}
         nodes.append(node)
         urls_to_nodes[p.url] = i
-    for i, p in enumerate(pages): 
+    for i, p in enumerate(pages):
         for t in p.targets:
             link_relationship = {"source": urls_to_nodes[p.url], "target": urls_to_nodes[t.url], "value": t.count}
             d3_link_relationships.append(link_relationship)
     d3 = {
-        "nodes": nodes, 
+        "nodes": nodes,
         "links":d3_link_relationships
         }
     return d3
 
-data = create_d3_link_relationships(pages)
-L=len(data['links'])
-Edges=[(data['links'][k]['source'], data['links'][k]['target']) for k in range(L)]
+def create_network_graph(pages):
+    data = create_d3_link_relationships(pages)
+    L=len(data['links'])
+    Edges=[(data['links'][k]['source'], data['links'][k]['target']) for k in range(L)]
 
-G=ig.Graph(Edges, directed=False)
+    G=ig.Graph(Edges, directed=True)
 
-labels=[]
-group=[]
-for node in data['nodes']:
-    labels.append(node['name'])
-    group.append(node['group'])
+    labels=[]
+    group=[]
+    for node in data['nodes']:
+        labels.append(node['name'])
+        group.append(node['group'])
 
-layt=G.layout('kk', dim=3)
+    layt=G.layout('kk', dim=3)
 
-N=len(data['nodes'])
-Xn=[layt[k][0] for k in range(N)]# x-coordinates of nodes
-Yn=[layt[k][1] for k in range(N)]# y-coordinates
-Zn=[layt[k][2] for k in range(N)]# z-coordinates
-Xe=[]
-Ye=[]
-Ze=[]
-for e in Edges:
-    Xe+=[layt[e[0]][0],layt[e[1]][0], None]# x-coordinates of edge ends
-    Ye+=[layt[e[0]][1],layt[e[1]][1], None]
-    Ze+=[layt[e[0]][2],layt[e[1]][2], None]
+    N=len(data['nodes'])
+    Xn=[layt[k][0] for k in range(N)]# x-coordinates of nodes
+    Yn=[layt[k][1] for k in range(N)]# y-coordinates
+    Zn=[layt[k][2] for k in range(N)]# z-coordinates
+    Xe=[]
+    Ye=[]
+    Ze=[]
+    for e in Edges:
+        Xe+=[layt[e[0]][0],layt[e[1]][0], None]# x-coordinates of edge ends
+        Ye+=[layt[e[0]][1],layt[e[1]][1], None]
+        Ze+=[layt[e[0]][2],layt[e[1]][2], None]
 
-trace1=Scatter3d(x=Xe,
-               y=Ye,
-               z=Ze,
-               mode='lines',
-               line=Line(color='rgb(125,125,125)', width=1),
-               hoverinfo='none'
-               )
-trace2=Scatter3d(x=Xn,
-               y=Yn,
-               z=Zn,
-               mode='markers',
-               name='actors',
-               marker=Marker(symbol='dot',
-                             size=6,
-                             color=group,
-                             colorscale='Viridis',
-                             line=Line(color='rgb(50,50,50)', width=0.5)
-                             ),
-               text=labels,
-               hoverinfo='text'
-               )
+    trace1=Scatter3d(x=Xe,
+                y=Ye,
+                z=Ze,
+                mode='lines',
+                line=Line(color='rgb(125,125,125)', width=1),
+                hoverinfo='none'
+                )
+    trace2=Scatter3d(x=Xn,
+                y=Yn,
+                z=Zn,
+                mode='markers',
+                name='actors',
+                marker=Marker(symbol='dot',
+                                size=6,
+                                color=group,
+                                colorscale='Viridis',
+                                line=Line(color='rgb(50,50,50)', width=0.5)
+                                ),
+                text=labels,
+                hoverinfo='text'
+                )
 
 
-axis=dict(showbackground=False,
-          showline=False,
-          zeroline=False,
-          showgrid=False,
-          showticklabels=False,
-          title=''
-          )
+    axis=dict(showbackground=False,
+            showline=False,
+            zeroline=False,
+            showgrid=False,
+            showticklabels=False,
+            title=''
+            )
 
-layout = Layout(
-         title="Syracuse City Site Analysis",
-         width=1000,
-         height=1000,
-         showlegend=False,
-         scene=Scene(
-         xaxis=XAxis(axis),
-         yaxis=YAxis(axis),
-         zaxis=ZAxis(axis),
+    layout = Layout(
+            title="Syracuse City Site Analysis",
+            width=1000,
+            height=1000,
+            showlegend=False,
+            scene=Scene(
+            xaxis=XAxis(axis),
+            yaxis=YAxis(axis),
+            zaxis=ZAxis(axis),
+            ),
+        margin=Margin(
+            t=100
         ),
-     margin=Margin(
-        t=100
-    ),
-    hovermode='closest',
-    annotations=Annotations([
-           Annotation(
-           showarrow=False,
-            text="Data source: <a href='http://syrnet.net'>[1]</a>",
-            xref='paper',
-            yref='paper',
-            x=0,
-            y=0.1,
-            xanchor='left',
-            yanchor='bottom',
-            font=Font(
-            size=14
-            )
-            )
-        ]),    )
+        hovermode='closest',
+        annotations=Annotations([
+            Annotation(
+            showarrow=False,
+                text="Data source: <a href='http://syrnet.net'>[1]</a>",
+                xref='paper',
+                yref='paper',
+                x=0,
+                y=0.1,
+                xanchor='left',
+                yanchor='bottom',
+                font=Font(
+                size=14
+                )
+                )
+            ]),    )
 
-data=Data([trace1, trace2])
-fig=Figure(data=data, layout=layout)
-offline.plot(fig, {'image': 'svg'})
+    data=Data([trace1, trace2])
+    fig=Figure(data=data, layout=layout)
+    offline.plot(fig, {'image': 'svg'})
 
-
-
-
-
+create_network_graph(page)
