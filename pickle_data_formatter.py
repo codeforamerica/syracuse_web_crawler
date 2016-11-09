@@ -33,7 +33,7 @@ class PickleFileReader():
             nodes.append(node)
         return nodes 
 
-    def create_d3_link_relationships_from_all_pages(self): 
+    def create_d3_link_relationships_from_all_pages(self, pages): 
         nodes = []
         node_urls = []
         d3_link_relationships = []
