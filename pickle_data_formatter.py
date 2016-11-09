@@ -39,20 +39,19 @@ class PickleFileReader():
         d3_link_relationships = []
 
         for p in self.all_pages.values(): 
-            if p.targets: 
-                for t in p.targets:
-                    link_relationship = {"source": p.url, "target": t.url, "value": t.count}
-                    d3_link_relationships.append(link_relationship)
-                    if p.url not in node_urls: 
-                        node_urls.append(p.url)
-                        group = self.retrieve_node_group(p.categories)
-                        node = {"id":p.url, "group":group}
-                        nodes.append(node)
-                    if t.url not in node_urls: 
-                        node_urls.append(t.url)
-                        group = self.retrieve_node_group(t.categories)
-                        node = {"id":t.url, "group":group}
-                        nodes.append(node)
+            for t in p.targets:
+                if p.url not in node_urls: 
+                    node_urls.append(p.url)
+                    group = self.retrieve_node_group(p.categories)
+                    node = {"id":p.url, "group":group}
+                    nodes.append(node)
+                if t.url not in node_urls: 
+                    node_urls.append(t.url)
+                    group = self.retrieve_node_group(t.categories)
+                    node = {"id":t.url, "group":group}
+                    nodes.append(node)
+                link_relationship = {"source": node_urls.index(p.url), "target": node_urls.index(t.url), "value": t.count}
+                d3_link_relationships.append(link_relationship)
         d3 = {
             "nodes": nodes, 
             "links":d3_link_relationships
