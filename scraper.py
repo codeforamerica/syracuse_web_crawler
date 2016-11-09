@@ -56,18 +56,18 @@ def retrieve_page_links(url,):
     mailto_links = []
     if url.startswith('mailto') or url.endswith('docx') or \
             url.endswith('pdf') or url.endswith('PDF') or url.endswith('doc'):
-        return [], []
+        return [], [], []
     broken_links = []
     all_links = []
     if not '/' in url:
         url = '/' + url
     if url in ALL_BROKEN_LINKS:
-        return [], []
+        return [], [], []
     res = make_request(url)
     content_type = res.headers['Content-Type']
     print(content_type)
     if 'text/html' not in content_type:
-        return [], []
+        return [], [], []
     html = res.text
     soup = BeautifulSoup(html, 'html.parser')
     body = soup.body
@@ -97,22 +97,22 @@ def retrieve_page_links(url,):
                     broken_links.append(href)
                 else:
                     all_links.append(href)
-        return all_links, broken_links
-    return [], []
+        return all_links, broken_links, mailto_links
+    return [], [], []
 
 
 class Page():
     def __init__(self, url, depth=None, categories=None):
         self.url = url
         self.targets = []
-        self.broken_targets = []
+        self.broken_targets = Counter()
         if depth:
             self.depth=depth
         else:
             self.depth = 0
         self.count = 1
         self.categories=set(categories,)
-        self.mailto_links = []
+        self.mailto_targets = Counter()
 
     def __str__(self):
         return self.url
@@ -129,9 +129,10 @@ class Page():
 
     def collect_links(self):
         print('PAGE FXN:' + self.url)
-        [links, broken_links] = retrieve_page_links(self.url)
+        [links, broken_links, mailto_links] = retrieve_page_links(self.url)
         self.broken_targets = Counter(broken_links)
-        print(links, self.broken_targets)
+        self.mailto_targets = Counter(mailto_links)
+        print(links, self.broken_targets, self.mailto_targets)
 
         ALL_BROKEN_LINKS.update(self.broken_targets)
         for link in links:
