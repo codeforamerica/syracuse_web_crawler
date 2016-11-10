@@ -5,8 +5,8 @@ import igraph as ig
 import plotly.plotly as py
 from plotly.graph_objs import *
 from plotly.offline import offline
-import os
-from jinja2 import Environment, FileSystemLoader
+from plotly.offline import plot
+import plotly.graph_objs as go
 
 
 path = '.'
@@ -48,7 +48,9 @@ def retrieve_node_group(categories):
         group = 22
     return group
 
-def create_d3_link_relationships(pages):
+def create_d3_link_relationships(pages,category=None):
+    if category:
+        pages = [p for p in pages if category in p.categories]
     nodes = []
     urls_to_nodes = {}
     d3_link_relationships = []
@@ -58,7 +60,12 @@ def create_d3_link_relationships(pages):
         nodes.append(node)
         urls_to_nodes[p.url] = i
     for i, p in enumerate(pages):
+        # keys errors were being generated for targets pages that didn't have a node because their category didn't match
         for t in p.targets:
+            if category and p.url not in urls_to_nodes.keys():
+                urls_to_nodes[p.url] = len(urls_to_nodes)
+            if category and t.url not in urls_to_nodes.keys():
+                urls_to_nodes[t.url] = len(urls_to_nodes)
             link_relationship = {"source": urls_to_nodes[p.url], "target": urls_to_nodes[t.url], "value": t.count}
             d3_link_relationships.append(link_relationship)
     d3 = {
@@ -67,8 +74,12 @@ def create_d3_link_relationships(pages):
         }
     return d3
 
-def create_network_graph(pages, filename):
-    data = create_d3_link_relationships(pages)
+def create_network_graph(pages, filename,category=None):
+    if category:
+        data = create_d3_link_relationships(pages, category)
+    else:
+        data = create_d3_link_relationships(pages)
+
     L=len(data['links'])
     Edges=[(data['links'][k]['source'], data['links'][k]['target']) for k in range(L)]
 
@@ -157,31 +168,17 @@ def create_network_graph(pages, filename):
 
     data=Data([trace1, trace2])
     fig=Figure(data=data, layout=layout)
-    offline.plot(fig, {'image': 'svg'},image_filename=filename)
+    offline.plot(fig, image='svg',filename=filename)
 
-graph = create_network_graph(pages, 'graphs/all_pages')
 
-PATH = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_ENVIRONMENT = Environment(
-    autoescape=False,
-    loader=FileSystemLoader(os.path.join(PATH, 'templates')),
-    trim_blocks=False)
+for category in SYRACUSE_SITE_CATEGORIES:
+    create_network_graph(pages, 'graphs/' + category, category)
 
-def render_template(template_filename, context):
-    return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
 
-def create_index_html():
-    fname = "index.html"
-    svgs = ['graphs/all_pages.html']
-    context = {
-        'svgs': svgs
-    }
-    #
-    with open(fname, 'w') as f:
-        html = render_template('index.html', context)
-        f.write(html)
 
-create_index_html()
+
+
+
 
 
 
