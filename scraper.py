@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 from collections import Counter
 from bs4 import BeautifulSoup
 import requests
@@ -41,7 +42,7 @@ def make_request(url, count=None):
         count = 0
 
     try:
-        res = requests.get(ROOT_URL + url, timeout=2)
+        res = requests.get(url, timeout=2)
     except Exception as e:
         print('timeout for %s at %s' % (url, count))
         time.sleep(30)
@@ -59,8 +60,6 @@ def retrieve_page_links(url,):
         return [], [], []
     broken_links = []
     all_links = []
-    if not '/' in url:
-        url = '/' + url
     res = make_request(url)
     content_type = res.headers['Content-Type']
     print(content_type)
@@ -75,7 +74,8 @@ def retrieve_page_links(url,):
             urls = []
             for link in links:
                 href = link.get('href')
-                if href and 'http' not in href:
+                if href and 'http' not in href and not \
+                        href.startswith('mailto'):
                     urls.append(href)
             links = urls
         else:
@@ -86,12 +86,11 @@ def retrieve_page_links(url,):
                 anchor = href.index('#')
                 href = href[:anchor]
             if href.startswith('mailto'):
-                mailto_links.append(href)
+                mailto_links.append(href.replace('mailto:', ''))
             else:
-                if href.startswith('/'):
-                    href = '/' + href
+                href = urljoin(url, href)
                 try:
-                    res = requests.get(ROOT_URL + href, timeout=2)
+                    res = requests.get(href, timeout=2)
                 except Exception:
                     broken_links.append(href)
                 else:
@@ -185,6 +184,7 @@ def initialize_origin_pages():
     for l in internal_links:
         url = l['url']
         categories = [l['category']]
+        url = urljoin(SITE_MAP_URL, url)
         page = Page(url=url,categories=categories)
         if url not in ALL_PAGES:
             ALL_PAGES[url] = page
