@@ -48,41 +48,34 @@ def retrieve_node_group(categories):
         group = 22
     return group
 
-def create_d3_link_relationships(pages,category=None):
-    if category:
-        pages = [p for p in pages if category in p.categories]
+def create_link_relationships(pages,category=None):
     nodes = []
     urls_to_nodes = {}
-    d3_link_relationships = []
     for i, p in enumerate(pages):
         group = retrieve_node_group(p.categories)
         node = {"name":p.url, "group":group}
         nodes.append(node)
         urls_to_nodes[p.url] = i
+    nodes_to_targets = []
     for i, p in enumerate(pages):
-        # keys errors were being generated for targets pages that didn't have a node because their category didn't match
-        for t in p.targets:
-            if category and p.url not in urls_to_nodes.keys():
-                urls_to_nodes[p.url] = len(urls_to_nodes)
-            if category and t.url not in urls_to_nodes.keys():
-                urls_to_nodes[t.url] = len(urls_to_nodes)
-            link_relationship = {"source": urls_to_nodes[p.url], "target": urls_to_nodes[t.url], "value": t.count}
-            d3_link_relationships.append(link_relationship)
-    d3 = {
+        if not category or (category and category in p.categories):
+            for t in p.targets:
+                nodes_to_targets.append((urls_to_nodes[p.url],
+                                         urls_to_nodes[t.url]))
+    links = {
         "nodes": nodes,
-        "links":d3_link_relationships
+        "links": nodes_to_targets,
         }
-    return d3
+    return links
 
 def create_network_graph(pages, filename,category=None):
     if category:
-        data = create_d3_link_relationships(pages, category)
+        data = create_link_relationships(pages, category)
     else:
-        data = create_d3_link_relationships(pages)
+        data = create_link_relationships(pages)
 
     L=len(data['links'])
-    Edges=[(data['links'][k]['source'], data['links'][k]['target']) for k in range(L)]
-
+    Edges=data['links']
     G=ig.Graph(Edges, directed=True)
 
     labels=[]
