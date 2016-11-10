@@ -5,6 +5,8 @@ import igraph as ig
 import plotly.plotly as py
 from plotly.graph_objs import *
 from plotly.offline import offline
+import os
+from jinja2 import Environment, FileSystemLoader
 
 
 path = '.'
@@ -65,7 +67,7 @@ def create_d3_link_relationships(pages):
         }
     return d3
 
-def create_network_graph(pages):
+def create_network_graph(pages, filename):
     data = create_d3_link_relationships(pages)
     L=len(data['links'])
     Edges=[(data['links'][k]['source'], data['links'][k]['target']) for k in range(L)]
@@ -127,7 +129,7 @@ def create_network_graph(pages):
             title="Syracuse City Site Analysis",
             width=1000,
             height=1000,
-            showlegend=True,
+            showlegend=False,
             scene=Scene(
             xaxis=XAxis(axis),
             yaxis=YAxis(axis),
@@ -155,6 +157,31 @@ def create_network_graph(pages):
 
     data=Data([trace1, trace2])
     fig=Figure(data=data, layout=layout)
-    offline.plot(fig, {'image': 'svg'})
+    offline.plot(fig, {'image': 'svg'},image_filename=filename)
 
-create_network_graph(pages)
+graph = create_network_graph(pages, 'graphs/all_pages')
+
+PATH = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_ENVIRONMENT = Environment(
+    autoescape=False,
+    loader=FileSystemLoader(os.path.join(PATH, 'templates')),
+    trim_blocks=False)
+
+def render_template(template_filename, context):
+    return TEMPLATE_ENVIRONMENT.get_template(template_filename).render(context)
+
+def create_index_html():
+    fname = "index.html"
+    svgs = ['graphs/all_pages.html']
+    context = {
+        'svgs': svgs
+    }
+    #
+    with open(fname, 'w') as f:
+        html = render_template('index.html', context)
+        f.write(html)
+
+create_index_html()
+
+
+
