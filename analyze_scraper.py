@@ -84,10 +84,9 @@ def create_network_graph(pages, filename,category=None):
         labels.append(node['name'])
         group.append(node['group'])
     print(category)
-    import ipdb; ipdb.set_trace()
     layt=G.layout('kk', dim=3)
-
-    N=len(data['nodes'])
+    print('built layout')
+    N=len(layt)
     Xn=[layt[k][0] for k in range(N)]# x-coordinates of nodes
     Yn=[layt[k][1] for k in range(N)]# y-coordinates
     Zn=[layt[k][2] for k in range(N)]# z-coordinates
@@ -167,12 +166,11 @@ def create_network_graph(pages, filename,category=None):
 
     data=Data([trace1, trace2])
     fig=Figure(data=data, layout=layout)
-    offline.plot(fig, image='svg',filename=filename)
+    offline.plot(fig, filename=filename)
 
-
+#create_network_graph(pages, 'graphs/all_pages')
 for category in SYRACUSE_SITE_CATEGORIES:
     create_network_graph(pages, 'graphs/' + category, category)
-
 
 
 
