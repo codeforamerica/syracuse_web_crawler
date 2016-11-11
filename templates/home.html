@@ -1,12 +1,18 @@
 {% block body %}
 	<div class="container">
-	<h3>View an individual department</h3>
+	<h3>Summary</h3>
+	<ul>
+		<li>There are {{all_pages_count}} total pages. (View network graph <a href="graphs/all_pages.html">here</a>.)</li>
+		<li>There are {{broken_links_count}} broken links.</li>
+	</ul>
+
+	<h3>View a Sitemap Category</h3>
 	<br>
 		{% for svg_row in svgs|batch(3) %}
 		<div class="row">
 			{% for svg in svg_row %}
 			<div class="col-sm-4">
-				<a class="btn btn-sq btn-primary btn-block" href="{{ svg.href }}">{{ svg.name }}
+				<a style="background:darkgreen;" class="btn btn-sq btn-primary btn-block" href="{{ svg.href }}">{{ svg.name }} | {{svg.count}} pages
 				</a><br>
 			</div>
 			{% endfor %}
