@@ -3,7 +3,29 @@
 	<h3>Summary</h3>
 	<ul>
 		<li>There are {{all_pages_count}} total pages. (View network graph <a href="graphs/all_pages.html">here</a>.)</li>
+
 		<li>There are {{broken_links_count}} broken links.</li>
+			<div class="row">
+				<div class="col-md-4">
+					<table class="table table-bordered">
+					    <thead>
+					      <tr>
+					        <th>Source Page</th>
+					        <th>Broken Links</th>
+					      </tr>
+					    </thead>
+					    <tbody>
+					    {% for p in pages_with_broken_links %}
+					      <tr>
+					        <td><a href="{{p.url}}">{{p.url}}</a></td>
+					        <td>{{p.broken_targets}}</td>
+					      </tr>
+					    {% endfor %}
+
+					    </tbody>
+					 </table>
+				 </div>
+			 </div>
 	</ul>
 
 	<h3>View a Sitemap Category</h3>

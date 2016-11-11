@@ -30,10 +30,19 @@ def create_index_html():
                 'count':len(count)}
         svgs.append(dpt)
 
+    for p in all_pages.values():
+        url_keys = list(p.broken_targets.elements())
+        js_keys = []
+        for k in url_keys:
+            if 'javascript' in k:
+                del p.broken_targets[k]
+    pages_with_broken_links = [p for p in all_pages.values() if len(p.broken_targets) > 0]
+
     context = {
         'svgs': svgs,
         'all_pages_count':len(all_pages),
-        'broken_links_count':len(list(broken_links.elements()))
+        'broken_links_count':len(pages_with_broken_links),
+        'pages_with_broken_links':pages_with_broken_links
     }
 
     #
