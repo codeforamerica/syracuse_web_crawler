@@ -42,7 +42,7 @@ def make_request(url, count=None):
         count = 0
 
     try:
-        res = requests.get(url, timeout=2)
+        res = requests.get(url, timeout=4)
     except Exception as e:
         print('timeout for %s at %s' % (url, count))
         time.sleep(30)
@@ -90,7 +90,7 @@ def retrieve_page_links(url,):
             else:
                 href = urljoin(url, href)
                 try:
-                    res = requests.get(href, timeout=2)
+                    res = requests.get(href, timeout=4)
                 except Exception:
                     broken_links.append(href)
                 else:
