@@ -68,7 +68,6 @@ def create_link_relationships(pages,category=None):
         "nodes": nodes,
         "links": nodes_to_targets,
         }
-    import pdb; pdb.set_trace()
     return links
 
 def create_network_graph(pages, filename,category=None):
