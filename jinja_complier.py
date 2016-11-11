@@ -24,8 +24,10 @@ def create_index_html():
     svgs = []
     for category in SYRACUSE_SITE_CATEGORIES:
         name = category.replace('_',' ')
+        count = [p for p in all_pages.values() if category in p.categories]
         dpt = {'href':'graphs/' + category + '.html',
-                'name':name}
+                'name':name,
+                'count':len(count)}
         svgs.append(dpt)
 
     context = {
