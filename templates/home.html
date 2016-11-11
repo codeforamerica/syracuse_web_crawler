@@ -1,0 +1,16 @@
+{% block body %}
+	<div class="container">
+	<h3>View an individual department</h3>
+	<br>
+		{% for svg_row in svgs|batch(3) %}
+		<div class="row">
+			{% for svg in svg_row %}
+			<div class="col-sm-4">
+				<a class="btn btn-sq btn-primary btn-block" href="{{ svg.href }}">{{ svg.name }}
+				</a><br>
+			</div>
+			{% endfor %}
+		</div>
+		{% endfor %}
+	</div>
+{% endblock %}
