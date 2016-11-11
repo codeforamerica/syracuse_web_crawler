@@ -6,8 +6,10 @@ import pickle
 path = '.'
 all_pages = pickle.load(open(path+'/all_pages.pickle', 'rb'))
 broken_links = pickle.load(open(path+'/all_broken_links.pickle', 'rb'))
-top_pages = pickle.load(open(path+'/top_pages.pickle', 'rb'))
 
+pages = list(all_pages.values())
+pages.sort(key=lambda x: x.count, reverse=True)
+top_pages = pages[0:200]
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_ENVIRONMENT = Environment(
@@ -42,7 +44,8 @@ def create_index_html():
         'svgs': svgs,
         'all_pages_count':len(all_pages),
         'broken_links_count':len(pages_with_broken_links),
-        'pages_with_broken_links':pages_with_broken_links
+        'pages_with_broken_links':pages_with_broken_links,
+        'top_pages':top_pages
     }
 
     #

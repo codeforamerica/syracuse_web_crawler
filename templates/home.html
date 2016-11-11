@@ -1,32 +1,88 @@
 {% block body %}
 	<div class="container">
 	<h3>Summary</h3>
-	<ul>
-		<li>There are {{all_pages_count}} total pages. (View network graph <a href="graphs/all_pages.html">here</a>.)</li>
+	 <section>
+		<div class="row">
+		    <div class="col-md-12 ">
+			    <div class="panel-group perk-panel" id="accordion">
 
-		<li>There are {{broken_links_count}} broken links.</li>
-			<div class="row">
-				<div class="col-md-4">
-					<table class="table table-bordered">
-					    <thead>
-					      <tr>
-					        <th>Source Page</th>
-					        <th>Broken Links</th>
-					      </tr>
-					    </thead>
-					    <tbody>
-					    {% for p in pages_with_broken_links %}
-					      <tr>
-					        <td><a href="{{p.url}}">{{p.url}}</a></td>
-					        <td>{{p.broken_targets}}</td>
-					      </tr>
-					    {% endfor %}
+			    <div class="panel panel-default">
+			    <div class="panel-heading color">
+			        <h4 class="panel-title">
+			            <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">Total Pages ({{all_pages_count}})</a>
+			        </h4>
+			    </div>
+			    <div id="collapse1" class="panel-collapse collapse">
+			            <div class="panel-body">
+			            	View the network graph <a href="graphs/all_pages.html">here</a>!
+			        	</div>
+				    </div>
+			    </div>
 
-					    </tbody>
-					 </table>
-				 </div>
-			 </div>
-	</ul>
+			    <div class="panel panel-default">
+			    <div class="panel-heading color">
+			        <h4 class="panel-title">
+			            <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">Top Linked Pages (200)</a>
+			        </h4>
+			    </div>
+			    <div id="collapse2" class="panel-collapse collapse">
+			            <div class="panel-body">
+			            <table class="table table-bordered">
+						    <thead>
+						      <tr>
+						        <th>Source Page</th>
+						        <th>Number of Pages Cited</th>
+						        <th>Categories</th>
+						      </tr>
+						    </thead>
+						    <tbody>
+						    {% for p in top_pages %}
+						      <tr>
+						        <td><a href="{{p.url}}">{{p.url}}</a></td>
+						        <td>{{p.count}}</td>
+						        <td>{{p.categories}}</td>
+
+						      </tr>
+						    {% endfor %}
+
+						    </tbody>
+					 	</table>
+
+			        	</div>
+				    </div>
+			    </div>
+
+			    <div class="panel panel-default">
+			    <div class="panel-heading color">
+			        <h4 class="panel-title">
+			            <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">Broken Links ({{broken_links_count}})</a>
+			        </h4>
+			    </div>
+			    <div id="collapse3" class="panel-collapse collapse">
+			         <div class="panel-body">
+			            <table class="table table-bordered">
+						    <thead>
+						      <tr>
+						        <th>Source Page</th>
+						        <th>Broken Links</th>
+						      </tr>
+						    </thead>
+						    <tbody>
+						    {% for p in pages_with_broken_links %}
+						      <tr>
+						        <td><a href="{{p.url}}">{{p.url}}</a></td>
+						        <td>{{p.broken_targets}}</td>
+						      </tr>
+						    {% endfor %}
+
+						    </tbody>
+					 	</table>
+					 </div>
+			     </div>
+				</div>
+			    </div>
+			</div>
+		</section>
 
 	<h3>View a Sitemap Category</h3>
 	<br>
