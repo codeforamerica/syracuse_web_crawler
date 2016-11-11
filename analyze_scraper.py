@@ -83,7 +83,8 @@ def create_network_graph(pages, filename,category=None):
     for node in data['nodes']:
         labels.append(node['name'])
         group.append(node['group'])
-
+    print(category)
+    import ipdb; ipdb.set_trace()
     layt=G.layout('kk', dim=3)
 
     N=len(data['nodes'])
