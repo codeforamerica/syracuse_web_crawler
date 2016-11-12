@@ -49,6 +49,8 @@ def retrieve_node_group(categories):
     return group
 
 def create_link_relationships(pages,category=None):
+    if category:
+        pages = list(filter(lambda page: category in page.categories, pages))
     nodes = []
     urls_to_nodes = {}
     for i, p in enumerate(pages):
@@ -58,8 +60,8 @@ def create_link_relationships(pages,category=None):
         urls_to_nodes[p.url] = i
     nodes_to_targets = []
     for i, p in enumerate(pages):
-        if not category or (category and category in p.categories):
-            for t in p.targets:
+        for t in p.targets:
+            if t.url in urls_to_nodes:
                 nodes_to_targets.append((urls_to_nodes[p.url],
                                          urls_to_nodes[t.url]))
     links = {
@@ -168,14 +170,7 @@ def create_network_graph(pages, filename,category=None):
     fig=Figure(data=data, layout=layout)
     offline.plot(fig, filename=filename)
 
-#create_network_graph(pages, 'graphs/all_pages')
+create_network_graph(pages, 'graphs/all_pages')
 for category in SYRACUSE_SITE_CATEGORIES:
     create_network_graph(pages, 'graphs/' + category, category)
-
-
-
-
-
-
-
 
