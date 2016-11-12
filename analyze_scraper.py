@@ -132,7 +132,7 @@ def create_network_graph(pages, filename,category=None):
             )
 
     if category:
-        title= filename.replace('_', ' ')
+        title= category.replace('_', ' ')
     else:
         title= "All Site Pages: Syracuse City Site Analysis"
 
