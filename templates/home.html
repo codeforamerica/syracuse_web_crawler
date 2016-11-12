@@ -37,7 +37,7 @@
 						    <tbody>
 						    {% for p in top_pages %}
 						      <tr>
-						        <td><a href="{{p.url}}">{{p.url}}</a></td>
+						        <td ><a href="{{p.url}}">{{p.url}}</a></td>
 						        <td>{{p.count}}</td>
 
 						      </tr>
@@ -58,23 +58,25 @@
 			    </div>
 			    <div id="collapse3" class="panel-collapse collapse">
 			         <div class="panel-body">
-			            <table class="table table-bordered">
+			         <div style="width:800px;">
+			            <table style="width:800px;" class="table table-bordered">
 						    <thead>
 						      <tr>
 						        <th>Source Page</th>
 						        <th>Broken Links</th>
 						      </tr>
 						    </thead>
-						    <tbody>
+						    <tbody >
 						    {% for p in pages_with_broken_links %}
 						      <tr>
-						        <td><a href="{{p.url}}">{{p.url}}</a></td>
-						        <td>{{p.broken_targets}}</td>
+						        <td style="word-break:break-all;"><a href="{{p.url}}">{{p.url}}</a></td>
+						        <td style="word-break:break-all;">{{p.broken_targets}}</td>
 						      </tr>
 						    {% endfor %}
 
 						    </tbody>
 					 	</table>
+					 	</div>
 					 	</div>
 			     </div>
 				</div>
