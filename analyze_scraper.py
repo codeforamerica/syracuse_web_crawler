@@ -14,7 +14,6 @@ all_pages = pickle.load(open(path+'/all_pages.pickle', 'rb'))
 broken_links = pickle.load(open(path+'/all_broken_links.pickle', 'rb'))
 top_pages = pickle.load(open(path+'/top_pages.pickle', 'rb'))
 
-"""
 print('top pages: %i' % len(top_pages))
 print('all pages: %i' % len(all_pages))
 print('broken links: %i' % len(list(broken_links.elements())))
@@ -40,21 +39,17 @@ print('mosted linked to broken links')
 ms = broken_links.most_common(100)
 for c in ms:
     print('%s: %s' % c)
-"""
 
 def retrieve_node_group(categories):
-    if categories:
-        category = categories.pop()
-        group = SYRACUSE_SITE_CATEGORIES.index(category)
-    else:
-        group = 22
+    category = list(categories)[0]
+    group = SYRACUSE_SITE_CATEGORIES.index(category)
     return group
 
 def create_link_relationships(pages,category=None):
        return links
 
 def create_network_graph_for_all():
-    pages = all_pages.values()
+    pages = list(all_pages.values())
     print('ALL')
     print(len(pages))
     nodes = []
@@ -89,7 +84,6 @@ def create_network_graph_for_category(category):
     print(category)
     print(len(pages))
     print(len(category_pages))
-    import pdb; pdb.set_trace()
     nodes = []
     urls_to_nodes = {}
     urls = []
@@ -212,10 +206,10 @@ def create_graph(data, labels, group, filename, category=None):
 
 
 data, labels, group = create_network_graph_for_all()
-#create_graph(data, labels, group, 'graphs/all_pages')
+create_graph(data, labels, group, 'graphs/all_pages')
 
 
 for category in SYRACUSE_SITE_CATEGORIES:
     data, labels, group = create_network_graph_for_category(category)
-    #create_graph(data, labels, group, 'graphs/' + category, category)
+    create_graph(data, labels, group, 'graphs/' + category, category)
 
