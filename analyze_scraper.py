@@ -14,6 +14,7 @@ all_pages = pickle.load(open(path+'/all_pages.pickle', 'rb'))
 broken_links = pickle.load(open(path+'/all_broken_links.pickle', 'rb'))
 top_pages = pickle.load(open(path+'/top_pages.pickle', 'rb'))
 
+"""
 print('top pages: %i' % len(top_pages))
 print('all pages: %i' % len(all_pages))
 print('broken links: %i' % len(list(broken_links.elements())))
@@ -39,6 +40,7 @@ print('mosted linked to broken links')
 ms = broken_links.most_common(100)
 for c in ms:
     print('%s: %s' % c)
+"""
 
 def retrieve_node_group(categories):
     if categories:
@@ -49,8 +51,12 @@ def retrieve_node_group(categories):
     return group
 
 def create_link_relationships(pages,category=None):
-    if category:
-        pages = list(filter(lambda page: category in page.categories, pages))
+       return links
+
+def create_network_graph_for_all():
+    pages = all_pages.values()
+    print('ALL')
+    print(len(pages))
     nodes = []
     urls_to_nodes = {}
     for i, p in enumerate(pages):
@@ -61,31 +67,64 @@ def create_link_relationships(pages,category=None):
     nodes_to_targets = []
     for i, p in enumerate(pages):
         for t in p.targets:
-            if t.url in urls_to_nodes:
-                nodes_to_targets.append((urls_to_nodes[p.url],
-                                         urls_to_nodes[t.url]))
-    links = {
+            nodes_to_targets.append((urls_to_nodes[p.url],
+                                        urls_to_nodes[t.url]))
+    data  = {
         "nodes": nodes,
         "links": nodes_to_targets,
         }
-    return links
-
-def create_network_graph(pages, filename,category=None):
-    if category:
-        data = create_link_relationships(pages, category)
-    else:
-        data = create_link_relationships(pages)
-
-    L=len(data['links'])
-    Edges=data['links']
-    G=ig.Graph(Edges, directed=True)
+    print(len(data['nodes']))
+    print(len(data['links']))
 
     labels=[]
     group=[]
     for node in data['nodes']:
         labels.append(node['name'])
         group.append(node['group'])
+    return data, labels, group
+
+def create_network_graph_for_category(category):
+    pages = list(all_pages.values())
+    category_pages = list(filter(lambda page: category in page.categories, pages))
     print(category)
+    print(len(pages))
+    print(len(category_pages))
+    nodes = []
+    urls_to_nodes = {}
+    urls = []
+    for page in category_pages:
+        nodes.append({"name":page.url, "group":0})
+        urls.append(page.url)
+    for page in category_pages:
+        for t in page.targets:
+            if t.url not in urls:
+                nodes.append({"name":t.url, "group":1})
+                urls.append(t.url)
+
+    for i,n in enumerate(nodes):
+        urls_to_nodes[n['name']] = i
+    nodes_to_targets = []
+    for p in category_pages:
+        for t in p.targets:
+            nodes_to_targets.append((urls_to_nodes[p.url],
+                                     urls_to_nodes[t.url]))
+    data  = {
+        "nodes": nodes,
+        "links": nodes_to_targets,
+        }
+
+    labels=[]
+    group=[]
+    for node in data['nodes']:
+        labels.append(node['name'])
+        group.append(node['group'])
+    print(len(data['nodes']))
+    print(len(data['links']))
+    return data, labels, group
+
+def create_graph(data, labels, group, filename, category=None):
+    Edges=data['links']
+    G=ig.Graph(Edges, directed=True)
     layt=G.layout('kk', dim=3)
     print('built layout')
     N=len(layt)
@@ -170,7 +209,12 @@ def create_network_graph(pages, filename,category=None):
     fig=Figure(data=data, layout=layout)
     offline.plot(fig, filename=filename)
 
-create_network_graph(pages, 'graphs/all_pages')
+
+#data, labels, group = create_network_graph_for_all()
+#create_graph(data, labels, group, 'graphs/all_pages')
+
+
 for category in SYRACUSE_SITE_CATEGORIES:
-    create_network_graph(pages, 'graphs/' + category, category)
+    data, labels, group = create_network_graph_for_category(category)
+    create_graph(data, labels, group, 'graphs/' + category, category)
 
