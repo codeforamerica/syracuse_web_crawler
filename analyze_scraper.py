@@ -89,6 +89,7 @@ def create_network_graph_for_category(category):
     print(category)
     print(len(pages))
     print(len(category_pages))
+    import pdb; pdb.set_trace()
     nodes = []
     urls_to_nodes = {}
     urls = []
@@ -210,11 +211,11 @@ def create_graph(data, labels, group, filename, category=None):
     offline.plot(fig, filename=filename)
 
 
-#data, labels, group = create_network_graph_for_all()
+data, labels, group = create_network_graph_for_all()
 #create_graph(data, labels, group, 'graphs/all_pages')
 
 
 for category in SYRACUSE_SITE_CATEGORIES:
     data, labels, group = create_network_graph_for_category(category)
-    create_graph(data, labels, group, 'graphs/' + category, category)
+    #create_graph(data, labels, group, 'graphs/' + category, category)
 
