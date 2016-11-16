@@ -55,8 +55,8 @@ def create_network_graph_for_all():
     nodes = []
     urls_to_nodes = {}
     for i, p in enumerate(pages):
-        group = retrieve_node_group(p.categories)
-        node = {"name":p.url, "group":group}
+        #group = retrieve_node_group(p.categories)
+        node = {"name":p.url, "group":p.depth}
         nodes.append(node)
         urls_to_nodes[p.url] = i
     nodes_to_targets = []
@@ -138,7 +138,7 @@ def create_graph(data, labels, group, filename, category=None):
                 y=Ye,
                 z=Ze,
                 mode='lines',
-                line=Line(color='rgb(125,125,125)', width=1),
+                line=Line(color='rgb(125,125,125)', width=2),
                 hoverinfo='none'
                 )
     trace2=Scatter3d(x=Xn,
@@ -150,6 +150,7 @@ def create_graph(data, labels, group, filename, category=None):
                                 size=6,
                                 color=group,
                                 colorscale='Viridis',
+                                showscale=True,
                                 line=Line(color='rgb(50,50,50)', width=0.5)
                                 ),
                 text=labels,
@@ -172,8 +173,8 @@ def create_graph(data, labels, group, filename, category=None):
 
     layout = Layout(
             title=title,
-            width=1000,
-            height=1000,
+            width='1000',
+            height='1000',
             showlegend=False,
             scene=Scene(
             xaxis=XAxis(axis),
@@ -206,10 +207,10 @@ def create_graph(data, labels, group, filename, category=None):
 
 
 data, labels, group = create_network_graph_for_all()
-create_graph(data, labels, group, 'graphs/all_pages')
+create_graph(data, labels, group, 'graphs/all_pages.html')
 
 
 for category in SYRACUSE_SITE_CATEGORIES:
     data, labels, group = create_network_graph_for_category(category)
-    create_graph(data, labels, group, 'graphs/' + category, category)
+    create_graph(data, labels, group, 'graphs/' + category + '.html', category)
 
