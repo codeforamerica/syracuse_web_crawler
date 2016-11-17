@@ -70,7 +70,9 @@
 						    {% for p in pages_with_broken_links %}
 						      <tr>
 						        <td style="word-break:break-all;"><a href="{{p.url}}">{{p.url}}</a></td>
-						        <td style="word-break:break-all;">{{p.broken_targets}}</td>
+
+							    <td style="word-break:break-all;">{{p.broken_targets}}</td>
+
 						      </tr>
 						    {% endfor %}
 
