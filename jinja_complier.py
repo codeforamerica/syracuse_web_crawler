@@ -44,7 +44,8 @@ def create_index_html():
         formatted_broken_links = []
         for d in p.broken_targets.elements():
             formatted_broken_links.append(d)
-        p.broken_targets = formatted_broken_links
+            b_link_string = ', '.join(formatted_broken_links)
+        p.broken_targets = b_link_string
 
     context = {
         'svgs': svgs,
