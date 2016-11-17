@@ -40,6 +40,12 @@ def create_index_html():
                 del p.broken_targets[k]
     pages_with_broken_links = [p for p in all_pages.values() if len(p.broken_targets) > 0]
 
+    for p in pages_with_broken_links:
+        formatted_broken_links = []
+        for d in p.broken_targets.elements():
+            formatted_broken_links.append(d)
+        p.broken_targets = formatted_broken_links
+
     context = {
         'svgs': svgs,
         'all_pages_count':len(all_pages),
