@@ -39,14 +39,7 @@ def create_index_html():
             if 'javascript' in k:
                 del p.broken_targets[k]
     pages_with_broken_links = [p for p in all_pages.values() if len(p.broken_targets) > 0]
-
-    for p in pages_with_broken_links:
-        formatted_broken_links = []
-        for d in p.broken_targets.elements():
-            formatted_broken_links.append(d)
-            b_link_string = ', '.join(formatted_broken_links)
-        p.broken_targets = b_link_string
-
+    
     context = {
         'svgs': svgs,
         'all_pages_count':len(all_pages),

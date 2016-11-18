@@ -14,7 +14,8 @@
 			    </div>
 			    <div id="collapse1" class="panel-collapse collapse">
 			            <div class="panel-body">
-			            	View the network graph <a href="graphs/all_pages.html">here</a>!
+                    View the network graph <a href="graphs/all_pages.html">here</a>!<br/>
+                    Colors represent the page depth from the site map where pages on the site map are 0 and ones they link to are 1 and so on.
 			        	</div>
 				    </div>
 			    </div>
@@ -71,8 +72,16 @@
 						      <tr>
 						        <td style="word-break:break-all;"><a href="{{p.url}}">{{p.url}}</a></td>
 
-							    <td style="word-break:break-all;">{{p.broken_targets}}</td>
-
+							      <td style="word-break:break-all;">
+                      {% for t in p.broken_targets.most_common() %}
+                      <div>
+                        <a href="{{ t[0] }}">
+                          {{ t[0]|replace('http://www.syrgov.net/', '')}}
+                        </a>:
+                        {{ t[1] }}
+                      </div>
+                      {% endfor %}
+                    </td>
 						      </tr>
 						    {% endfor %}
 
@@ -85,8 +94,11 @@
 			    </div>
 			</div>
 		</section>
-
-	<h3>View a Sitemap Category</h3>
+	<h3>View a Sitemap by Category</h3>
+  <section>
+  <p>
+    Each network graph uses purple for pages in that section and yellow for pages out of that section.  In the case of Services all of the pages are services and therefore is all colored green.
+  </p>
 	<br>
 		{% for svg_row in svgs|batch(3) %}
 		<div class="row">
@@ -99,4 +111,5 @@
 		</div>
 		{% endfor %}
 	</div>
+  </section>
 {% endblock %}
