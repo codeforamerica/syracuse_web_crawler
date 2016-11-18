@@ -99,6 +99,9 @@
   <p>
     Each network graph uses purple for pages in that section and yellow for pages out of that section.  In the case of Services all of the pages are services and therefore is all colored green.
   </p>
+  <p>
+    If no graph is present it means not enough pages in the section link to each other to make a graph.
+  </p>
 	<br>
 		{% for svg_row in svgs|batch(3) %}
 		<div class="row">
